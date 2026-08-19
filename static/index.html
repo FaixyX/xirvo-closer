@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xirvo AI Assistant</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div>
+            <h1>Xirvo</h1>
+            <p class="subtitle">AI Assistant</p>
+          </div>
+        </div>
+        <button id="new-conversation" type="button" class="ghost-button">
+          New Conversation
+        </button>
+      </header>
+
+      <div id="error-banner" class="error-banner" hidden role="alert"></div>
+
+      <main id="chat-log" class="chat-log" aria-live="polite"></main>
+
+      <div id="typing-indicator" class="typing-indicator" hidden>
+        <span></span><span></span><span></span>
+        <em>Xirvo is answering…</em>
+      </div>
+
+      <form id="chat-form" class="composer">
+        <label class="sr-only" for="message-input">Message</label>
+        <div class="composer-box">
+          <textarea
+            id="message-input"
+            rows="1"
+            placeholder="Ask about Xirvo services, process, or portfolio…"
+            autocomplete="off"
+          ></textarea>
+          <button id="send-button" type="submit">Send</button>
+        </div>
+        <p class="composer-hint">Enter to send · Shift + Enter for a new line</p>
+      </form>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
