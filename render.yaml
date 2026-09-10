@@ -1,0 +1,46 @@
+databases:
+  - name: xirvo-closing-agent-db
+    databaseName: xirvo_closing_agent
+    user: xirvo
+    plan: basic-256mb
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: xirvo-closing-agent
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: xirvo-closing-agent-db
+          property: connectionString
+      - key: DEBUG
+        value: "false"
+      - key: APP_HOST
+        value: "0.0.0.0"
+      - key: GEMINI_MODEL
+        value: "gemini-3.7-flash"
+      - key: GEMINI_EMBEDDING_MODEL
+        value: "gemini-embedding-001"
+      - key: GEMINI_EMBEDDING_DIMENSION
+        value: "3072"
+      - key: RAG_TOP_K
+        value: "5"
+      - key: CHUNK_SIZE_TOKENS
+        value: "600"
+      - key: CHUNK_OVERLAP_TOKENS
+        value: "80"
+      - key: STANDARD_HOURLY_RATE
+        value: "40"
+      - key: MIN_PROJECT_AMOUNT
+        value: "500"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: INTERNAL_MIN_HOURLY_RATE
+        sync: false

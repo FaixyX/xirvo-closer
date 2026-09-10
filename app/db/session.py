@@ -13,14 +13,20 @@ configure_windows_event_loop()
 
 _settings = get_settings()
 
+_engine_kwargs = {
+    "pool_pre_ping": True,
+    "pool_size": 5,
+    "max_overflow": 5,
+    "pool_recycle": 300,
+}
+
 async_engine = create_async_engine(
     _settings.async_database_url,
-    pool_pre_ping=True,
+    **_engine_kwargs,
 )
-
 sync_engine = create_engine(
     _settings.sync_database_url,
-    pool_pre_ping=True,
+    **_engine_kwargs,
 )
 
 
