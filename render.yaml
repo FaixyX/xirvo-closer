@@ -2,14 +2,14 @@ databases:
   - name: xirvo-closing-agent-db
     databaseName: xirvo_closing_agent
     user: xirvo
-    plan: basic-256mb
+    plan: free
     postgresMajorVersion: "16"
 
 services:
   - type: web
     name: xirvo-closing-agent
     runtime: python
-    plan: starter
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
