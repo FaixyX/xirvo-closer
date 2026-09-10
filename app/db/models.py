@@ -31,6 +31,19 @@ class MessageRole(str, Enum):
     assistant = "assistant"
 
 
+class TechnicalFit(str, Enum):
+    pending = "pending"
+    qualified = "qualified"
+    unqualified = "unqualified"
+
+
+class CommercialFit(str, Enum):
+    pending = "pending"
+    qualified = "qualified"
+    negotiation_required = "negotiation_required"
+    unqualified = "unqualified"
+
+
 class Document(Base):
     __tablename__ = "documents"
 
@@ -88,6 +101,33 @@ class Message(Base):
     conversation_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False, index=True)
     role: Mapped[str] = mapped_column(String(16), nullable=False)
     content: Mapped[dict] = mapped_column(JSONB, nullable=False, default=lambda: {"messages": []})
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
+class LeadProfile(Base):
+    __tablename__ = "lead_profiles"
+    __table_args__ = (
+        CheckConstraint(
+            "technical_fit IN ('pending', 'qualified', 'unqualified')",
+            name="ck_lead_profiles_technical_fit",
+        ),
+        CheckConstraint(
+            "commercial_fit IN ('pending', 'qualified', 'negotiation_required', 'unqualified')",
+            name="ck_lead_profiles_commercial_fit",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    technical_fit: Mapped[str] = mapped_column(String(32), nullable=False, default=TechnicalFit.pending.value)
+    commercial_fit: Mapped[str] = mapped_column(String(32), nullable=False, default=CommercialFit.pending.value)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

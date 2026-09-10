@@ -13,15 +13,14 @@ from app.schemas import (
     SessionResponse,
     UsageResponse,
 )
+from app.services.chat_service import handle_chat
+from app.services.exceptions import GeminiGenerationError
 from app.services.gemini_service import GeminiService
 from app.services.message_service import (
     ConversationNotFoundError,
-    append_assistant_message,
-    append_user_messages,
     conversation_exists,
     create_session,
     get_history,
-    record_usage,
     sum_usage,
 )
 from app.services.rag_service import RAGService
@@ -50,46 +49,22 @@ async def chat(
         raise HTTPException(status_code=422, detail="At least one non-empty message is required.")
 
     try:
-        appended = await append_user_messages(session, payload.conversation_id, user_texts)
+        result = await handle_chat(
+            session,
+            payload.conversation_id,
+            user_texts,
+            rag_service,
+            gemini_service,
+        )
     except ConversationNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-
-    question = "\n".join(user_texts)
-    retrieved = await rag_service.retrieve(session, question)
-    context_chunks = rag_service.to_prompt_chunks(retrieved)
-
-    history = await get_history(session, payload.conversation_id)
-    previous = [item for item in history if item.get("batch_id") != appended["batch_id"]]
-
-    try:
-        generation = await gemini_service.generate_answer(
-            history=previous,
-            context_chunks=context_chunks,
-            user_texts=user_texts,
-        )
-    except Exception as exc:
+    except GeminiGenerationError as exc:
         raise HTTPException(
             status_code=502,
             detail=f"Gemini did not return a response: {exc}",
         ) from exc
 
-    await append_assistant_message(
-        session,
-        payload.conversation_id,
-        generation.text,
-        appended["batch_id"],
-        commit=False,
-    )
-    await record_usage(
-        session,
-        payload.conversation_id,
-        generation.input_tokens,
-        generation.output_tokens,
-        generation.total_tokens,
-        commit=False,
-    )
-    await session.commit()
-    return ChatResponse(conversation_id=payload.conversation_id, response=generation.text)
+    return ChatResponse(conversation_id=result.conversation_id, response=result.response)
 
 
 @router.get("/chat/{conversation_id}", response_model=HistoryResponse)

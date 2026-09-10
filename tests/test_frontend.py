@@ -55,3 +55,5 @@ def test_frontend_does_not_contain_secrets() -> None:
     assert "GEMINI_API_KEY" not in combined
     assert "DB_PASSWORD" not in combined
     assert "postgresql" not in combined.lower()
+    assert "INTERNAL_MIN_HOURLY_RATE" not in combined
+    assert "hidden minimum" not in combined.lower()

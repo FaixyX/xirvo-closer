@@ -8,3 +8,7 @@ class PgVectorNotAvailableError(Exception):
 
 class EmbeddingDimensionError(Exception):
     """Raised when Gemini returns an embedding of the wrong size."""
+
+
+class GeminiGenerationError(Exception):
+    """Raised when Gemini does not return a usable response."""

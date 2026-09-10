@@ -11,9 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.compat import configure_windows_event_loop
 from app.config import get_settings
-from app.db.models import Document, DocumentChunk, LLMUsage, Message
+from app.db.models import Document, DocumentChunk, LLMUsage, LeadProfile, Message
 from app.db.session import AsyncSessionLocal
-from app.services.gemini_service import GenerationResult
+from app.services.gemini_service import GenerationResult, SalesTurnResult
 
 configure_windows_event_loop()
 
@@ -79,6 +79,26 @@ class FakeGeminiService:
             total_tokens=125,
         )
 
+    async def generate_sales_turn(
+        self,
+        history,
+        context_chunks,
+        user_texts,
+        lead_state=None,
+        tool_executor=None,
+    ) -> SalesTurnResult:
+        generation = await self.generate_answer(history, context_chunks, user_texts)
+        self.calls[-1]["lead_state"] = lead_state
+        return SalesTurnResult(
+            assistant_response=generation.text,
+            next_action="answer_question",
+            observations={},
+            qualification_tool_needed=False,
+            handoff_required=False,
+            usage_events=[generation],
+            tool_executed=False,
+        )
+
 
 def write_pdf(path: Path, pages: list[str]) -> Path:
     document = pymupdf.open()
@@ -123,6 +143,7 @@ async def db_available(db_session: AsyncSession) -> AsyncSession:
 async def cleanup_conversation(session: AsyncSession, conversation_id: uuid.UUID) -> None:
     await session.execute(delete(Message).where(Message.conversation_id == conversation_id))
     await session.execute(delete(LLMUsage).where(LLMUsage.conversation_id == conversation_id))
+    await session.execute(delete(LeadProfile).where(LeadProfile.id == conversation_id))
     await session.commit()
 
 

@@ -36,6 +36,10 @@ class Settings(BaseSettings):
 
     knowledge_base_path: str
 
+    standard_hourly_rate: float
+    min_project_amount: float
+    internal_min_hourly_rate: float
+
     @property
     def resolved_knowledge_base_path(self) -> Path:
         path = Path(self.knowledge_base_path)

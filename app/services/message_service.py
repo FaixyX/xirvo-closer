@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import flag_modified
 
-from app.db.models import LLMUsage, Message, MessageRole
+from app.db.models import LeadProfile, LLMUsage, Message, MessageRole, TechnicalFit, CommercialFit
 
 
 class ConversationNotFoundError(LookupError):
@@ -34,6 +34,11 @@ async def create_session(session: AsyncSession) -> uuid.UUID:
                 conversation_id=conversation_id,
                 role=MessageRole.assistant.value,
                 content={"messages": []},
+            ),
+            LeadProfile(
+                id=conversation_id,
+                technical_fit=TechnicalFit.pending.value,
+                commercial_fit=CommercialFit.pending.value,
             ),
         ]
     )

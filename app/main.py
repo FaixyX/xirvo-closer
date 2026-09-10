@@ -20,8 +20,8 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(
-    title="Xirvo RAG Chatbot",
-    description="Phase 1 knowledge-base question answering for Xirvo.",
+    title="Xirvo Sales Closer",
+    description="Phase 2 consultative sales closer and lead qualification agent, grounded in the Xirvo RAG knowledge base.",
     lifespan=lifespan,
 )
 app.include_router(health_router, prefix="/api")
